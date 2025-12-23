@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Waste - Noat Boat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f2f2f2; color: #111; height: 100vh; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #d9d9d9; background: #ffffff; gap: 12px; }
+    .back-btn { padding: 6px 12px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 13px; color: #111; text-decoration: none; }
+    .title { font-size: 16px; font-weight: 700; font-family: monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .save-status { font-size: 12px; color: #666; font-family: monospace; }
+    .main { display: flex; flex: 1; overflow: hidden; gap: 16px; padding: 14px; min-height: 0; }
+    .editor-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; }
+    textarea { flex: 1; border: 1px solid #d9d9d9; border-radius: 12px; resize: none; padding: 14px; font-size: 14px; line-height: 1.55; font-family: monospace; background: #fff; color: #111; outline: none; }
+    .canvas-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; border: 1px solid #d9d9d9; border-radius: 12px; overflow: hidden; background: #fff; }
+    .canvas-toolbar { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #d9d9d9; background: #ffffff; flex-shrink: 0; }
+    .btn { padding: 5px 10px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 12px; color: #111; }
+    .btn.active { background: #eef5ff; border-color: #c9dcff; }
+    .canvas-container { flex: 1; position: relative; overflow: hidden; min-height: 0; display: flex; align-items: center; justify-content: center; }
+    .canvas-wrapper { transform-origin: center center; }
+    .audio-player { padding: 10px; border-top: 1px solid #d9d9d9; display: none; flex-shrink: 0; }
+    .audio-player audio { width: 100%; }
+    @media (max-width: 768px) { .main { flex-direction: column; } .editor-pane, .canvas-pane { flex: none; height: 45vh; } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="../index.html" class="back-btn">Back</a>
+    <div class="title">The Waste</div>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+  <div class="main">
+    <div class="editor-pane">
+      <textarea id="editor" spellcheck="false">Allow people to make their own websites? Shared via workshop in the BG
+
+What about porn etc? Would have to be text only or only images from Skrawloid or Waste World gallery?
+
+So I&#39;d have to make a website builder? With say only text boxes and images- can dragthem around? Or maybe I&#39;d have to use a template for each page and they would fill in the template check image--&gt;
+
+THis template based way would be the simplest and could work
+
+The only images they can load are from scrawloid or the Photo Gallery- 
+
+So they would click Create new page and it would- 
+
+generate a unique url
+
+Load the template
+
+They fill in the text and images
+
+Save page
+
+Now how would they share their page? Auto add it so everyone can access?
+
+Need to think about this as it would download all the files to their computer and have to load them all at startup-
+
+Don&#39;t do that- yeah prob not-</textarea>
+    </div>
+    <div class="canvas-pane" id="canvasPane">
+      <div class="canvas-toolbar">
+        <button id="selectBtn" class="btn active">Select</button>
+        <button id="drawBtn" class="btn">Draw</button>
+      </div>
+      <div class="canvas-container" id="canvasContainer">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="fabricCanvas"></canvas>
+        </div>
+      </div>
+      <div class="audio-player"><audio controls loop src=""></audio></div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var STORAGE_KEY = 'noatboat_' + "the-waste";
+      var canvasJson = "{\"version\":\"5.3.0\",\"objects\":[]}";
+      var canvasImage = "canvas.png";
+      var fallbackImage = null;
+      var fabricCanvas = null, saveTimer = null;
+      var originalW = 600, originalH = 800; // defaults
+      var editor = document.getElementById('editor');
+      var saveStatus = document.getElementById('saveStatus');
+      
+      try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) { var data = JSON.parse(saved); if (data.content) editor.value = data.content; } } catch(e){}
+      
+      function scheduleSave() {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(function() {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ content: editor.value })); saveStatus.textContent = 'saved'; } catch(e){}
+        }, 1000);
+      }
+      editor.addEventListener('input', function() { saveStatus.textContent = 'modified'; scheduleSave(); });
+      
+      function scaleCanvasToFit() {
+        var container = document.getElementById('canvasContainer');
+        var wrapper = document.getElementById('canvasWrapper');
+        var rect = container.getBoundingClientRect();
+        var containerW = rect.width - 20;
+        var containerH = rect.height - 20;
+        
+        if (containerW <= 0 || containerH <= 0) return;
+        
+        var scaleX = containerW / originalW;
+        var scaleY = containerH / originalH;
+        var scale = Math.min(scaleX, scaleY, 1); // never scale up beyond 1
+        
+        wrapper.style.transform = 'scale(' + scale + ')';
+      }
+      
+      function initCanvas() {
+        // Get original dimensions from JSON if available
+        if (canvasJson) {
+          originalW = canvasJson.width || 600;
+          originalH = canvasJson.height || 800;
+        }
+        
+        var el = document.getElementById('fabricCanvas');
+        el.width = originalW;
+        el.height = originalH;
+        
+        fabricCanvas = new fabric.Canvas('fabricCanvas', { 
+          width: originalW, 
+          height: originalH, 
+          backgroundColor: null 
+        });
+        fabricCanvas.freeDrawingBrush.width = 3;
+        fabricCanvas.freeDrawingBrush.color = '#000000';
+        
+        if (canvasJson) {
+          fabricCanvas.loadFromJSON(canvasJson, function() {
+            fabricCanvas.renderAll();
+            scaleCanvasToFit();
+          });
+        } else if (canvasImage || fallbackImage) {
+          fabric.Image.fromURL(canvasImage || fallbackImage, function(img) {
+            if (!img) return;
+            img.set({ left: 0, top: 0, selectable: true });
+            fabricCanvas.add(img);
+            fabricCanvas.renderAll();
+            scaleCanvasToFit();
+          }, null, { crossOrigin: 'anonymous' });
+        } else {
+          scaleCanvasToFit();
+        }
+      }
+      
+      document.getElementById('selectBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = false; 
+          this.classList.add('active'); 
+          document.getElementById('drawBtn').classList.remove('active'); 
+        } 
+      };
+      document.getElementById('drawBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = true; 
+          this.classList.add('active'); 
+          document.getElementById('selectBtn').classList.remove('active'); 
+        } 
+      };
+      
+      setTimeout(initCanvas, 150);
+      
+      window.addEventListener('resize', function() {
+        scaleCanvasToFit();
+      });
+    })();
+  </script>
+</body>
+</html>
