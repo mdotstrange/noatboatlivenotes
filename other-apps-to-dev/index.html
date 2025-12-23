@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Other apps to dev - Noat Boat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f2f2f2; color: #111; height: 100vh; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #d9d9d9; background: #ffffff; gap: 12px; }
+    .back-btn { padding: 6px 12px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 13px; color: #111; text-decoration: none; }
+    .title { font-size: 16px; font-weight: 700; font-family: monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .save-status { font-size: 12px; color: #666; font-family: monospace; }
+    .main { display: flex; flex: 1; overflow: hidden; gap: 16px; padding: 14px; min-height: 0; }
+    .editor-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; }
+    textarea { flex: 1; border: 1px solid #d9d9d9; border-radius: 12px; resize: none; padding: 14px; font-size: 14px; line-height: 1.55; font-family: monospace; background: #fff; color: #111; outline: none; }
+    .canvas-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; border: 1px solid #d9d9d9; border-radius: 12px; overflow: hidden; background: #fff; }
+    .canvas-toolbar { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #d9d9d9; background: #ffffff; flex-shrink: 0; }
+    .btn { padding: 5px 10px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 12px; color: #111; }
+    .btn.active { background: #eef5ff; border-color: #c9dcff; }
+    .canvas-container { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+    .canvas-container canvas { position: absolute; top: 0; left: 0; }
+    .canvas-container .canvas-container { position: absolute !important; top: 0; left: 0; width: 100% !important; height: 100% !important; }
+    .audio-player { padding: 10px; border-top: 1px solid #d9d9d9; display: none; flex-shrink: 0; }
+    .audio-player audio { width: 100%; }
+    @media (max-width: 768px) { .main { flex-direction: column; } .editor-pane, .canvas-pane { flex: none; height: 45vh; } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="../index.html" class="back-btn">Back</a>
+    <div class="title">Other apps to dev</div>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+  <div class="main">
+    <div class="editor-pane">
+      <textarea id="editor" spellcheck="false">- make friends human chat/sharing app
+
+- more creative apps
+
+
+
+- TLKING HED
+
+User leaves voice message into void
+Voice message transcribed to text
+
+User receives voice message from void
+User listens to voice message
+text is translated into their language
+text is read by text to speech
+line art cartoon head is animated to audio speech
+user can choose to receive these voice messages
+
+ No usernames/locations are shared
+
+COSTS
+
+speech to text
+text translation
+tts in app
+
+SHIT too expensive forget it
+
+THINK AGAIN- html prototype
+
+
+
+</textarea>
+    </div>
+    <div class="canvas-pane" id="canvasPane">
+      <div class="canvas-toolbar">
+        <button id="selectBtn" class="btn active">Select</button>
+        <button id="drawBtn" class="btn">Draw</button>
+      </div>
+      <div class="canvas-container" id="canvasContainer"><canvas id="fabricCanvas"></canvas></div>
+      <div class="audio-player"><audio controls loop src=""></audio></div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var STORAGE_KEY = 'noatboat_' + "other-apps-to-dev";
+      var canvasJson = "{\"version\":\"5.3.0\",\"objects\":[{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":170.15,\"top\":301.47,\"width\":693.81,\"height\":746.23,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",669.7998133995849,302.96684006576265],[\"Q\",669.7968133995848,302.96684006576265,668.7965101360021,302.96684006576265],[\"Q\",667.7962068724194,302.96684006576265,663.7949938180885,302.96684006576265],[\"Q\",659.7937807637577,302.96684006576265,650.7910513915133,302.96684006576265],[\"Q\",641.7883220192689,302.96684006576265,629.7846828562764,302.96684006576265],[\"Q\",617.7810436932839,302.96684006576265,599.7755849487951,306.96805297624735],[\"Q\",581.7701262043064,310.969265886732,550.7607250332424,325.9738143010496],[\"Q\",519.7513238621784,340.97836271536715,481.73979984603545,364.9856401782753],[\"Q\",443.7282758298925,388.99291764118345,407.717358340915,419.0020144698186],[\"Q\",371.70644085193743,449.01111129845384,337.6961298901253,483.02142103757365],[\"Q\",303.68581892831315,517.0317307766935,274.6770242844146,552.0423437434346],[\"Q\",245.66822964051602,587.0529567101756,225.66216436886185,620.0629632216743],[\"Q\",205.65609909720766,653.072969733173,195.65306646138055,680.0811568789446],[\"Q\",185.65003382555346,707.0893440247163,180.64851750763992,731.0966214876245],[\"Q\",175.64700118972638,755.1038989505327,173.64639466256097,777.1105699581984],[\"Q\",171.64578813539555,799.1172409658642,171.64578813539555,818.1230022906665],[\"Q\",171.64578813539555,837.1287636154688,172.64609139897826,852.1333120297863],[\"Q\",173.64639466256097,867.1378604441039,179.64821424405721,880.1418024031791],[\"Q\",185.65003382555346,893.1457443622544,193.65245993421513,906.1496863213297],[\"Q\",201.65488604287683,919.1536282804049,211.65791867870394,930.1569637842379],[\"Q\",221.66095131453102,941.1602992880707,231.6639839503581,951.1633315642824],[\"Q\",241.66701658618518,961.1663638404941,251.6700492220123,970.1690928890847],[\"Q\",261.6730818578394,979.1718219376753,274.67702428441464,990.1751574415082],[\"Q\",287.6809667109898,1001.1784929453411,300.68490913756506,1009.1809187663105],[\"Q\",313.6888515641403,1017.1833445872799,326.6927939907155,1023.1851639530068],[\"Q\",339.6967364172907,1029.1869833187338,353.7009821074487,1034.1884994568397],[\"Q\",367.7052277976066,1039.1900155949456,384.7103832785126,1042.1909252778091],[\"Q\",401.7155387594187,1045.1918349606726,417.720390976742,1047.192441415915],[\"Q\",433.7252431940654,1049.1930478711574,451.73070193855415,1049.1930478711574],[\"Q\",469.73616068304295,1049.1930478711574,491.74283248186254,1046.192138188294],[\"Q\",513.7495042806821,1043.1912285054302,539.7573891338326,1033.1881962292186],[\"Q\",565.7652739869831,1023.1851639530068,592.7734621037162,1010.1812219939316],[\"Q\",619.7816502204494,997.1772800348564,646.7898383371826,982.1727316205388],[\"Q\",673.7980264539157,967.1681832062212,698.8056080434834,950.1630283366612],[\"Q\",723.8131896330511,933.1578734671014,744.819558168288,917.1530218251626],[\"Q\",765.8259267035249,901.1481701832238,782.831082184431,886.1436217689062],[\"Q\",799.8362376653371,871.1390733545886,810.8395735647468,859.1354346231345],[\"Q\",821.8429094641566,847.1317958916804,830.845638836401,831.1269442497417],[\"Q\",839.8483682086454,815.122092607803,846.8504910537245,798.116937738243],[\"Q\",853.8526138988034,781.1117828686831,857.8538269531342,765.1069312267443],[\"Q\",861.855040007465,749.1020795848056,862.8553432710478,730.0963182600033],[\"Q\",863.8556465346304,711.090556935201,864.8559497982131,686.0829762446717],[\"Q\",865.8562530617959,661.0753955541423,862.8553432710478,632.0666019531284],[\"Q\",859.8544334802996,603.0578083521144,853.8526138988034,578.050227661585],[\"Q\",847.8507943173071,553.0426469710558,839.8483682086454,534.0368856462535],[\"Q\",831.8459420999837,515.0311243214512,822.8432127277393,499.02627267951243],[\"Q\",813.8404833554949,483.0214210375737,804.8377539832505,468.01687262325606],[\"Q\",795.8350246110061,453.0123242089385,786.8322952387618,443.0092919327268],[\"Q\",777.8295658665174,433.00625965651506,768.826836494273,425.00383383554566],[\"Q\",759.8241071220286,417.00140801457627,748.8207712226188,408.99898219360693],[\"Q\",737.817435323209,400.99655637263754,723.813189633051,393.99443377928935],[\"Q\",709.8089439428932,386.9923111859411,697.8053047799007,382.9910982754564],[\"Q\",685.8016656169082,378.9898853649717,669.7968133995848,375.9889756821082],[\"Q\",653.7919611822615,372.9880659992447,634.78619917419,372.9880659992447],[\"Q\",615.7804371661185,372.9880659992447,597.7749784216297,371.9877627716236],[\"Q\",579.7695196771409,370.9874595440024,564.7649707234003,370.9874595440024],[\"Q\",549.7604217696597,370.9874595440024,535.7561760795018,370.9874595440024],[\"Q\",521.7519303893438,370.9874595440024,510.748594489934,370.9874595440024],[\"Q\",499.7452585905242,370.9874595440024,490.74252921827986,370.9874595440024],[\"Q\",481.73979984603545,370.9874595440024,474.7376770009565,370.9874595440024],[\"Q\",467.73555415587754,370.9874595440024,464.7346443651294,370.9874595440024],[\"Q\",461.73373457438123,370.9874595440024,459.7331280472158,373.98836922686587],[\"L\",457.7295215200504,376.9922789097294]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":316.19,\"top\":561.54,\"width\":220.07,\"height\":132.05,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",317.68706461847114,563.0426792472674],[\"Q\",317.6900646184711,563.0456792472675,318.6903678820538,563.0456792472675],[\"Q\",319.69067114563654,563.0456792472675,321.69127767280196,564.0459824748887],[\"Q\",323.6918841999674,565.0462857025099,331.69431030862904,569.0474986129946],[\"Q\",339.6967364172907,573.0487115234793,356.7018918981968,584.0520470273121],[\"Q\",373.70704737910285,595.055382531145,395.7137191779225,610.0599309454626],[\"Q\",417.72039097674207,625.0644793597802,439.72706277556165,639.0687245464766],[\"Q\",461.73373457438123,653.072969733173,477.7385867917046,662.0756987817635],[\"Q\",493.74343900902795,671.0784278303541,504.74677490843777,677.0802471960812],[\"Q\",515.7501108078476,683.0820665618082,522.7522336529265,687.0832794722928],[\"Q\",529.7543564980054,691.0844923827775,533.7555695523363,693.0850988380198],[\"L\",537.7597826066672,695.0887052932623]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":406.21,\"top\":607.56,\"width\":88.03,\"height\":114.04,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",495.74704553619335,609.0566277178414],[\"Q\",495.74404553619337,609.0596277178414,494.7437422726107,609.0596277178414],[\"Q\",493.74343900902795,609.0596277178414,491.74283248186254,612.0605374007049],[\"Q\",489.7422259546971,615.0614470835684,483.74040637320087,622.0635696769166],[\"Q\",477.7385867917046,629.0656922702649,469.73616068304295,640.0690277740978],[\"Q\",461.73373457438123,651.0723632779307,452.7310052021369,663.0760020093848],[\"Q\",443.7282758298925,675.0796407408388,436.72615298481355,684.0823697894293],[\"Q\",429.72403013973457,693.0850988380199,424.72251382182105,700.0872214313681],[\"Q\",419.7209975039075,707.0893440247163,413.7191779224112,715.0917698456857],[\"L\",407.71435834091494,723.0971956666551]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":632.28,\"top\":547.54,\"width\":92.03,\"height\":98.04,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",633.7828959106072,549.038434060571],[\"Q\",633.7858959106072,549.0414340605711,633.7858959106072,550.0417372881923],[\"Q\",633.7858959106072,551.0420405158134,636.7868057013554,553.0426469710558],[\"Q\",639.7877154921035,555.0432534262981,644.7892318100171,561.0450727920252],[\"Q\",649.7907481279307,567.0468921577522,657.7931742365923,576.0496212063426],[\"Q\",665.795600345254,585.0523502549332,672.7977231903329,593.0547760759026],[\"Q\",679.7998460354119,601.057201896872,684.8013623533254,607.0590212625991],[\"Q\",689.802878671239,613.0608406283261,695.8046982527353,619.0626599940531],[\"Q\",701.8065178342315,625.0644793597802,706.8080341521451,629.0656922702649],[\"Q\",711.8095504700586,633.0669051807496,714.8104602608067,637.0681180912343],[\"Q\",717.8113700515548,641.069331001719,719.8119765787203,643.0699374569613],[\"Q\",721.8125831058857,645.0705439122037,723.813189633051,646.0708471398248],[\"L\",725.8167961602165,647.074150367446]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":626.28,\"top\":571.55,\"width\":98.04,\"height\":78.03,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",725.8167961602165,573.0487115234793],[\"Q\",725.8137961602165,573.0487115234793,724.8134928966338,573.0487115234793],[\"Q\",723.8131896330511,573.0487115234793,719.8119765787203,573.0487115234793],[\"Q\",715.8107635243895,573.0487115234793,708.8086406793104,575.0493179787215],[\"Q\",701.8065178342315,577.049924433964,693.8040917255698,583.0517437996909],[\"Q\",685.8016656169082,589.0535631654179,678.7995427718292,595.0553825311449],[\"Q\",671.7974199267502,601.057201896872,665.7956003452539,607.0590212625991],[\"Q\",659.7937807637577,613.0608406283261,652.7916579186788,620.0629632216743],[\"Q\",645.7895350735998,627.0650858150225,641.7883220192689,633.0669051807495],[\"Q\",637.787108964938,639.0687245464766,634.78619917419,643.0699374569613],[\"Q\",631.7852893834419,647.071150367446,629.7846828562765,649.0717568226883],[\"L\",627.781076329111,651.0753632779307]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":412.22,\"top\":803.62,\"width\":296.09,\"height\":88.03,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",415.71978444957665,805.1160603315911],[\"Q\",415.71978444957665,805.1190603315912,414.7194811859939,805.1190603315912],[\"Q\",413.71917792241123,805.1190603315912,413.71917792241123,806.1193635592124],[\"Q\",413.71917792241123,807.1196667868336,414.7194811859939,810.1205764696971],[\"Q\",415.71978444957665,813.1214861525606,418.72069424032475,819.1233055182877],[\"Q\",421.7216040310729,825.1251248840147,426.7231203489864,830.1266410221206],[\"Q\",431.7246366669,835.1281571602264,438.7267595119789,843.1305829811957],[\"Q\",445.7288823570579,851.1330088021651,453.73130846571956,859.1354346231345],[\"Q\",461.73373457438123,867.1378604441039,470.73646394662563,872.1393765822097],[\"Q\",479.73919331887004,877.1408927203156,491.74283248186254,882.1424088584215],[\"Q\",503.74647164485503,887.1439249965274,518.7510205985957,889.1445314517698],[\"Q\",533.7555695523363,891.1451379070121,546.7595119789115,892.1454411346333],[\"Q\",559.7634544054868,893.1457443622544,574.7680033592274,893.1457443622544],[\"Q\",589.7725523129681,893.1457443622544,604.7771012667088,892.1454411346333],[\"Q\",619.7816502204494,891.1451379070121,629.7846828562765,888.1442282241485],[\"Q\",639.7877154921035,885.143318541285,649.7907481279306,880.1418024031791],[\"Q\",659.7937807637577,875.1402862650733,667.7962068724194,870.1387701269675],[\"Q\",675.798632981081,865.1372539888616,682.80075582616,860.1357378507557],[\"Q\",689.802878671239,855.1342217126498,694.8043949891526,851.1330088021651],[\"Q\",699.8059113070661,847.1317958916804,702.8068210978142,844.130886208817],[\"Q\",705.8077308885623,841.1299765259535,706.8080341521451,839.129370070711],[\"Q\",707.8083374157278,837.1287636154688,708.8086406793104,836.1284603878476],[\"Q\",709.8089439428932,835.1281571602264,709.8089439428932,834.1278539326051],[\"Q\",709.8089439428932,833.1275507049841,709.8089439428932,832.127247477363],[\"Q\",709.8089439428932,831.1269442497418,709.8089439428932,830.1266410221206],[\"Q\",709.8089439428932,829.1263377944994,708.8086406793104,828.1260345668782],[\"Q\",707.8083374157278,827.1257313392571,702.8068210978142,824.1248216563936],[\"Q\",697.8053047799007,821.12391197353,696.805001516318,821.12391197353],[\"Q\",695.8046982527353,821.12391197353,695.8046982527353,820.1236087459088],[\"Q\",695.8046982527353,819.1233055182877,695.8046982527353,817.1226990630453],[\"L\",695.8046982527353,815.1190926078029]]}]}";
+      var canvasImage = "canvas.png";
+      var fallbackImage = null;
+      var fabricCanvas = null, saveTimer = null;
+      var editor = document.getElementById('editor');
+      var saveStatus = document.getElementById('saveStatus');
+      
+      try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) { var data = JSON.parse(saved); if (data.content) editor.value = data.content; } } catch(e){}
+      
+      function scheduleSave() {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(function() {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ content: editor.value })); saveStatus.textContent = 'saved'; } catch(e){}
+        }, 1000);
+      }
+      editor.addEventListener('input', function() { saveStatus.textContent = 'modified'; scheduleSave(); });
+      
+      function scaleCanvasContent() {
+        if (!fabricCanvas) return;
+        var objects = fabricCanvas.getObjects();
+        if (objects.length === 0) return;
+        
+        var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        objects.forEach(function(obj) {
+          var bound = obj.getBoundingRect();
+          minX = Math.min(minX, bound.left);
+          minY = Math.min(minY, bound.top);
+          maxX = Math.max(maxX, bound.left + bound.width);
+          maxY = Math.max(maxY, bound.top + bound.height);
+        });
+        
+        var contentW = maxX - minX;
+        var contentH = maxY - minY;
+        if (contentW <= 0 || contentH <= 0) return;
+        
+        var cW = fabricCanvas.width;
+        var cH = fabricCanvas.height;
+        var padding = 20;
+        
+        // Always scale to fit with padding
+        var scaleX = (cW - padding * 2) / contentW;
+        var scaleY = (cH - padding * 2) / contentH;
+        var scale = Math.min(scaleX, scaleY, 2); // Don't scale up more than 2x
+        
+        var centerX = cW / 2;
+        var centerY = cH / 2;
+        var contentCenterX = minX + contentW / 2;
+        var contentCenterY = minY + contentH / 2;
+        
+        objects.forEach(function(obj) {
+          var objLeft = obj.left;
+          var objTop = obj.top;
+          
+          // Calculate new position relative to content center, then scale and move to canvas center
+          var relX = objLeft - contentCenterX;
+          var relY = objTop - contentCenterY;
+          
+          obj.scaleX = (obj.scaleX || 1) * scale;
+          obj.scaleY = (obj.scaleY || 1) * scale;
+          obj.left = centerX + relX * scale;
+          obj.top = centerY + relY * scale;
+          obj.setCoords();
+        });
+        
+        fabricCanvas.renderAll();
+      }
+      
+      function initCanvas() {
+        var container = document.getElementById('canvasContainer');
+        var rect = container.getBoundingClientRect();
+        var w = Math.floor(rect.width) || 400;
+        var h = Math.floor(rect.height) || 300;
+        
+        var el = document.getElementById('fabricCanvas');
+        el.width = w;
+        el.height = h;
+        
+        fabricCanvas = new fabric.Canvas('fabricCanvas', { width: w, height: h, backgroundColor: null });
+        fabricCanvas.freeDrawingBrush.width = 3;
+        fabricCanvas.freeDrawingBrush.color = '#000000';
+        
+        if (canvasJson) {
+          fabricCanvas.loadFromJSON(canvasJson, function() {
+            scaleCanvasContent();
+          });
+        } else if (canvasImage || fallbackImage) {
+          fabric.Image.fromURL(canvasImage || fallbackImage, function(img) {
+            if (!img) return;
+            var maxW = w - 40;
+            var maxH = h - 40;
+            var scale = Math.min(maxW / img.width, maxH / img.height, 1);
+            img.scale(scale);
+            img.set({ 
+              left: (w - img.getScaledWidth()) / 2, 
+              top: (h - img.getScaledHeight()) / 2,
+              selectable: true
+            });
+            fabricCanvas.add(img);
+            fabricCanvas.renderAll();
+          }, null, { crossOrigin: 'anonymous' });
+        }
+      }
+      
+      document.getElementById('selectBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = false; 
+          this.classList.add('active'); 
+          document.getElementById('drawBtn').classList.remove('active'); 
+        } 
+      };
+      document.getElementById('drawBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = true; 
+          this.classList.add('active'); 
+          document.getElementById('selectBtn').classList.remove('active'); 
+        } 
+      };
+      
+      // Wait for layout to settle before initializing canvas
+      setTimeout(initCanvas, 150);
+      
+      // Handle resize
+      var resizeTimer = null;
+      window.addEventListener('resize', function() {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          if (fabricCanvas) {
+            var container = document.getElementById('canvasContainer');
+            var rect = container.getBoundingClientRect();
+            var w = Math.floor(rect.width) || 400;
+            var h = Math.floor(rect.height) || 300;
+            fabricCanvas.setDimensions({ width: w, height: h });
+            if (canvasJson) {
+              fabricCanvas.loadFromJSON(canvasJson, function() {
+                scaleCanvasContent();
+              });
+            }
+          }
+        }, 200);
+      });
+    })();
+  </script>
+</body>
+</html>
