@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noat Boat - Published Notes</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B3%3C/text%3E%3C/svg%3E">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #f2f2f2;
+      color: #111;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; flex: 1; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .boat-container {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14px; line-height: 1.1; white-space: pre; margin: 20px auto; color: #666;
+    }
+    h1 { font-size: 28px; margin-top: 20px; font-weight: 700; }
+    .subtitle { color: #666; font-size: 14px; margin-top: 8px; }
+    .notes-list { background: #ffffff; border: 1px solid #d9d9d9; border-radius: 12px; overflow: hidden; }
+    .note-link {
+      display: block; padding: 16px 20px; text-decoration: none; color: #111;
+      border-bottom: 1px solid #d9d9d9; transition: background 0.15s ease;
+    }
+    .note-link:last-child { border-bottom: none; }
+    .note-link:hover { background: #f8f8f8; }
+    .note-title { font-size: 16px; font-weight: 600; color: #0066cc; }
+    .note-meta { font-size: 12px; color: #666; margin-top: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="boat-container" id="asciiBoat">   .  o ..                  \n     o . o o.o                \n          ...oo               \n            __[]__            \n         __|_o_o_o\\__         \n         \\""""""""""\"/         \n          \\. ..  . /          \n     ^^^^^^^^^^^^^^^^^^^^</div>
+      <h1>Noat Boat</h1>
+      <p class="subtitle">Published Notes</p>
+    </div>
+    <div class="notes-list" id="notesList">
+      <a href="./test-new-features/index.html" class="note-link">
+        <div class="note-title">Test New Features</div>
+        <div class="note-meta">12/23/2025</div>
+      </a>
+      <!-- NOTE_LINKS_PLACEHOLDER -->
+    </div>
+  </div>
+  <div class="footer">Made with Noat Boat</div>
+  <script>
+    (function() {
+      var boatEl = document.getElementById('asciiBoat');
+      if (!boatEl) return;
+      var base = boatEl.textContent;
+      var lines = base.split('\n');
+      var wavePattern = '^_^^^-^^_^^^^-^^^-^';
+      var runsByLine = lines.map(function(line) {
+        var runs = [], re = /\^+/g, m;
+        while ((m = re.exec(line)) !== null) runs.push({ start: m.index, len: m[0].length });
+        return runs;
+      });
+      var offset = 0;
+      setInterval(function() {
+        offset = (offset + 1) % wavePattern.length;
+        var out = lines.map(function(line, i) {
+          var runs = runsByLine[i];
+          if (!runs || runs.length === 0) return line;
+          var chars = line.split('');
+          for (var j = 0; j < runs.length; j++) {
+            var r = runs[j], need = r.len, seq = '';
+            for (var x = 0; x < 5; x++) seq += wavePattern;
+            seq = seq.slice(offset, offset + need);
+            for (var k = 0; k < need; k++) chars[r.start + k] = seq[k];
+          }
+          return chars.join('');
+        });
+        boatEl.textContent = out.join('\n');
+      }, 140);
+    })();
+  </script>
+</body>
+</html>
