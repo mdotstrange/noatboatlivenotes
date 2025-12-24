@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Please halp scaling - Noat Boat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f2f2f2; color: #111; height: 100vh; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #d9d9d9; background: #ffffff; gap: 12px; }
+    .back-btn { padding: 6px 12px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 13px; color: #111; text-decoration: none; }
+    .title { font-size: 16px; font-weight: 700; font-family: monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .save-status { font-size: 12px; color: #666; font-family: monospace; }
+    .main { display: flex; flex: 1; overflow: hidden; gap: 16px; padding: 14px; min-height: 0; }
+    .editor-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; }
+    textarea { flex: 1; border: 1px solid #d9d9d9; border-radius: 12px; resize: none; padding: 14px; font-size: 14px; line-height: 1.55; font-family: monospace; background: #fff; color: #111; outline: none; }
+    .canvas-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; border: 1px solid #d9d9d9; border-radius: 12px; overflow: hidden; background: #fff; }
+    .canvas-toolbar { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #d9d9d9; background: #ffffff; flex-shrink: 0; }
+    .btn { padding: 5px 10px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 12px; color: #111; }
+    .btn.active { background: #eef5ff; border-color: #c9dcff; }
+    #canvasContainer { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+    #canvasContainer canvas { display: block; }
+    #canvasContainer .canvas-container { position: absolute !important; }
+    .audio-player { padding: 10px; border-top: 1px solid #d9d9d9; display: none; flex-shrink: 0; }
+    .audio-player audio { width: 100%; }
+    @media (max-width: 768px) { .main { flex-direction: column; } .editor-pane, .canvas-pane { flex: none; height: 45vh; } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="../index.html" class="back-btn">Back</a>
+    <div class="title">Please halp scaling</div>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+  <div class="main">
+    <div class="editor-pane">
+      <textarea id="editor" spellcheck="false">Please halp</textarea>
+    </div>
+    <div class="canvas-pane" id="canvasPane">
+      <div class="canvas-toolbar">
+        <button id="selectBtn" class="btn active">Select</button>
+        <button id="drawBtn" class="btn">Draw</button>
+      </div>
+      <div id="canvasContainer">
+        <canvas id="fabricCanvas"></canvas>
+      </div>
+      <div class="audio-player"><audio controls loop src=""></audio></div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var STORAGE_KEY = 'noatboat_' + "please-halp-scaling";
+      var canvasJson = "{\"version\":\"5.3.0\",\"objects\":[{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":444.23,\"top\":661.58,\"width\":443.79,\"height\":470.14,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",761.8277136491942,663.0760020093848],[\"Q\",761.8247136491941,663.0760020093848,760.8244103856114,663.0760020093848],[\"Q\",759.8241071220286,663.0760020093848,756.8231973312805,663.0760020093848],[\"Q\",753.8222875405324,663.0760020093848,747.8204679590361,663.0760020093848],[\"Q\",741.8186483775398,663.0760020093848,731.8156157417127,663.0760020093848],[\"Q\",721.8125831058857,663.0760020093848,706.808034152145,663.0760020093848],[\"Q\",691.8034851984044,663.0760020093848,673.7980264539156,663.0760020093848],[\"Q\",655.7925677094269,663.0760020093848,638.7874122285208,666.0769116922482],[\"Q\",621.7822567476147,669.0778213751117,606.7777077938741,675.0796407408388],[\"Q\",591.7731588401335,681.0814601065658,579.769519677141,691.0844923827776],[\"Q\",567.7658805141484,701.0875246589893,554.7619380875733,717.092376300928],[\"Q\",541.7579956609981,733.0972279428668,525.7531434436746,763.1063247715019],[\"Q\",509.7482912263513,793.1154216001372,492.7431357454452,831.1269442497418],[\"Q\",475.7379802645392,869.1384668993463,465.7349476287121,901.1481701832238],[\"Q\",455.731914992885,933.1578734671014,451.73070193855415,956.1648477023883],[\"Q\",447.7294888842233,979.1718219376753,446.7291856206406,995.1766735796141],[\"Q\",445.7288823570579,1011.1815252215528,445.7288823570579,1021.1845574977644],[\"Q\",445.7288823570579,1031.1875897739762,445.7288823570579,1036.1891059120821],[\"Q\",445.7288823570579,1041.190622050188,447.7294888842233,1044.1915317330515],[\"Q\",449.73009541138873,1047.192441415915,453.73130846571956,1053.194260781642],[\"Q\",457.7325215200504,1059.196080147369,463.73434110154665,1066.198202740717],[\"Q\",469.73616068304295,1073.2003253340654,477.7385867917046,1079.2021446997924],[\"Q\",485.7410129003663,1085.2039640655196,497.7446520633588,1092.2060866588677],[\"Q\",509.7482912263513,1099.208209252216,528.7540532344228,1106.2103318455643],[\"Q\",547.7598152424943,1113.2124544389123,572.767396832062,1119.2142738046396],[\"Q\",597.7749784216297,1125.2160931703665,625.7834698019456,1128.21700285323],[\"Q\",653.7919611822615,1131.2179125360935,675.798632981081,1132.2182157637146],[\"Q\",697.8053047799007,1133.2185189913357,713.810156997224,1133.2185189913357],[\"Q\",729.8150092145473,1133.2185189913357,743.8192549047053,1133.2185189913357],[\"Q\",757.8235005948633,1133.2185189913357,767.8265332306903,1133.2185189913357],[\"Q\",777.8295658665174,1133.2185189913357,785.8319919751791,1131.2179125360935],[\"Q\",793.8344180838408,1129.2173060808511,799.836237665337,1127.2166996256087],[\"Q\",805.8380572468333,1125.2160931703665,810.8395735647468,1122.215183487503],[\"Q\",815.8410898826604,1119.2142738046393,820.842606200574,1113.2124544389123],[\"Q\",825.8441225184874,1107.2106350731854,831.8459420999836,1097.2076027969738],[\"Q\",837.8477616814799,1087.204570520762,842.8492779993935,1073.2003253340654],[\"Q\",847.8507943173071,1059.196080147369,854.8529171623861,1039.1900155949456],[\"Q\",861.855040007465,1019.1839510425222,868.857162852544,994.1763703519928],[\"Q\",875.8592856976229,969.1687896614635,879.8604987519537,943.160905743313],[\"Q\",883.8617118062846,917.1530218251626,885.86231833345,894.1460475898756],[\"Q\",887.8629248606154,871.1390733545886,888.8632281241981,851.1330088021653],[\"Q\",889.8635313877809,831.1269442497418,887.8629248606155,812.1211829249395],[\"Q\",885.86231833345,793.1154216001372,881.8611052791192,777.1105699581984],[\"Q\",877.8598922247884,761.1057183162596,871.8580726432922,750.1023828124268],[\"Q\",865.8562530617959,739.0990473085939,859.8544334802996,731.0966214876245],[\"Q\",853.8526138988034,723.0941956666551,847.8507943173071,718.0926795285493],[\"Q\",841.8489747358108,713.0911633904434,837.8477616814799,710.0902537075799],[\"Q\",833.8465486271491,707.0893440247163,829.8453355728183,706.0890407970951],[\"Q\",825.8441225184874,705.088737569474,821.8429094641566,704.0884343418528],[\"Q\",817.8416964098258,703.0881311142316,813.8404833554949,701.0875246589892],[\"Q\",809.8392703011641,699.0869182037469,805.8380572468333,697.0863117485046],[\"Q\",801.8368441925024,695.0857052932622,797.8356311381716,693.0850988380198],[\"Q\",793.8344180838408,691.0844923827775,790.8335082930926,689.0838859275352],[\"Q\",787.8325985023445,687.0832794722929,783.8313854480136,685.0826730170506],[\"Q\",779.8301723936828,683.0820665618082,775.828959339352,682.081763334187],[\"Q\",771.8277462850211,681.0814601065658,763.8253201763595,679.0808536513234],[\"Q\",755.8228940676978,677.0802471960811,748.8207712226188,676.0799439684599],[\"Q\",741.8186483775398,675.0796407408388,734.8165255324609,675.0796407408388],[\"Q\",727.814402687382,675.0796407408388,720.812279842303,674.0793375132176],[\"L\",713.807156997224,673.0760342855964]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":618.62,\"top\":787.61,\"width\":73.68,\"height\":0,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",621.7792567476147,789.1142086896525],[\"Q\",621.7822567476147,789.1142086896525,620.7819534840321,789.1142086896525],[\"Q\",619.7816502204494,789.1142086896525,621.7822567476148,789.1142086896525],[\"Q\",623.7828632747802,789.1142086896525,630.7849861198591,789.1142086896525],[\"Q\",637.787108964938,789.1142086896525,646.7898383371825,789.1142086896525],[\"Q\",655.7925677094269,789.1142086896525,662.7946905545059,789.1142086896525],[\"Q\",669.7968133995848,789.1142086896525,681.8004525625773,789.1142086896525],[\"L\",693.8070917255699,789.1142086896525]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":754.32,\"top\":787.61,\"width\":60.02,\"height\":0,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",755.8198940676978,789.1142086896525],[\"Q\",755.8228940676978,789.1142086896525,757.8235005948632,789.1142086896525],[\"Q\",759.8241071220286,789.1142086896525,765.8259267035248,789.1142086896525],[\"Q\",771.8277462850211,789.1142086896525,779.8301723936828,789.1142086896525],[\"Q\",787.8325985023445,789.1142086896525,794.8347213474235,789.1142086896525],[\"Q\",801.8368441925024,789.1142086896525,808.8389670375814,789.1142086896525],[\"L\",815.8440898826605,789.1142086896525]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":574.27,\"top\":917.65,\"width\":198.07,\"height\":48.02,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",575.76530662281,919.1506282804048],[\"Q\",575.7683066228101,919.1536282804049,576.7686098863928,920.1539315080261],[\"Q\",577.7689131499756,921.1542347356473,583.7707327314718,925.155447646132],[\"Q\",589.7725523129681,929.1566605566167,596.7746751580471,933.1578734671014],[\"Q\",603.776798003126,937.159086377586,610.778920848205,941.1602992880707],[\"Q\",617.7810436932839,945.1615121985553,626.7837730655283,949.16272510904],[\"Q\",635.7865024377727,953.1639380195247,644.7892318100171,957.1651509300094],[\"Q\",653.7919611822615,961.1663638404941,662.7946905545059,964.1672735233576],[\"Q\",671.7974199267502,967.1681832062212,680.8001492989946,967.1681832062212],[\"Q\",689.802878671239,967.1681832062212,697.8053047799007,967.1681832062212],[\"Q\",705.8077308885623,967.1681832062212,713.810156997224,967.1681832062212],[\"Q\",721.8125831058857,967.1681832062212,726.8140994237992,966.1678799786],[\"Q\",731.8156157417128,965.1675767509788,735.8168287960436,963.1669702957365],[\"Q\",739.8180418503745,961.1663638404941,742.8189516411226,960.166060612873],[\"Q\",745.8198614318708,959.1657573852518,748.8207712226189,956.1648477023882],[\"Q\",751.821681013367,953.1639380195247,755.8228940676978,949.16272510904],[\"Q\",759.8241071220286,945.1615121985553,762.8250169127768,943.160905743313],[\"Q\",765.8259267035249,941.1602992880707,767.8265332306903,939.1596928328283],[\"Q\",769.8271397578558,937.159086377586,771.8277462850212,936.1587831499648],[\"L\",773.8313528121867,935.1554799223436]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":44.1,\"top\":61.39,\"width\":160.05,\"height\":86.03,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",45.60457692397416,62.891065436681224],[\"Q\",45.60757692397416,62.894065436681224,46.607880187556866,62.894065436681224],[\"Q\",47.608183451139574,62.894065436681224,54.61030629621854,64.89467189192356],[\"Q\",61.612429141297504,66.89527834716591,75.61667483145544,72.89709771289296],[\"Q\",89.62092052161337,78.89891707861999,107.62637926610213,88.90194935483171],[\"Q\",125.63183801059091,98.90498163104343,142.63699349149698,107.90771067963398],[\"Q\",159.64214897240302,116.91043972822453,169.64518160823013,122.91225909395158],[\"Q\",179.64821424405721,128.91407845967862,187.65064035271888,133.9155945977845],[\"Q\",195.65306646138058,138.91711073589033,200.65458277929412,143.91862687399617],[\"L\",205.65909909720764,148.92314301210203]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":132.48,\"top\":57.39,\"width\":19.66,\"height\":100.04,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",153.64032939090677,58.889852526196535],[\"Q\",153.64032939090677,58.892852526196535,153.64032939090677,59.89315575381771],[\"Q\",153.64032939090677,60.893458981438876,153.64032939090677,63.89436866430239],[\"Q\",153.64032939090677,66.89527834716591,153.64032939090677,71.89679448527178],[\"Q\",153.64032939090677,76.89831062337764,152.64002612732406,82.90012998910467],[\"Q\",151.63972286374135,88.90194935483171,149.63911633657594,95.90407194817992],[\"Q\",147.63850980941052,102.90619454152812,145.6379032822451,110.9086203624975],[\"Q\",143.6372967550797,118.91104618346688,140.63638696433156,125.91316877681508],[\"Q\",137.6354771735834,132.9152913701633,136.6351739100007,135.9162010530268],[\"Q\",135.634870646418,138.91711073589033,134.6345673828353,141.91802041875385],[\"Q\",133.63426411925258,144.91893010161738,135.634870646418,151.92105269496557],[\"L\",137.6384771735834,158.92617528831377]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":1204.71,\"top\":59.39,\"width\":75.78,\"height\":84.03,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",1207.9569692070825,60.893458981438876],[\"Q\",1207.9599692070824,60.893458981438876,1206.9596659434997,60.893458981438876],[\"Q\",1205.959362679917,60.893458981438876,1206.9596659434997,60.893458981438876],[\"Q\",1207.9599692070824,60.893458981438876,1209.9605757342479,63.89436866430239],[\"Q\",1211.9611822614133,66.89527834716591,1216.962698579327,71.89679448527178],[\"Q\",1221.9642148972405,76.89831062337764,1227.9660344787367,83.90043321672584],[\"Q\",1233.9678540602329,90.90255581007405,1238.9693703781463,96.90437517580108],[\"Q\",1243.97088669606,102.90619454152812,1248.9724030139737,108.90801390725517],[\"Q\",1253.9739193318871,114.9098332729822,1259.9757389133833,120.91165263870923],[\"Q\",1265.9775584948795,126.91347200443626,1269.9787715492103,130.91468491492094],[\"Q\",1273.9799846035412,134.91589782540564,1275.9805911307067,137.91680750826916],[\"Q\",1277.9811976578721,140.91771719113268,1279.9818041850376,142.91832364637503],[\"L\",1281.9854107122028,144.92193010161736]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":1230.46,\"top\":95.4,\"width\":46.02,\"height\":50.02,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",1277.984197657872,96.90137517580109],[\"Q\",1277.9811976578721,96.90437517580109,1276.9808943942894,96.90437517580109],[\"Q\",1275.9805911307067,96.90437517580109,1274.980287867124,98.90498163104343],[\"Q\",1273.9799846035412,100.90558808628577,1269.9787715492103,104.90680099677047],[\"Q\",1265.9775584948795,108.90801390725515,1260.976042176966,114.90983327298218],[\"Q\",1255.9745258590524,120.91165263870923,1250.973009541139,125.91316877681508],[\"Q\",1245.9714932232255,130.91468491492094,1241.9702801688945,134.91589782540564],[\"Q\",1237.9690671145638,138.91711073589033,1234.9681573238156,142.91832364637503],[\"L\",1231.9642475330675,146.9225365568597]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":64.11,\"top\":1711.89,\"width\":106.04,\"height\":94.03,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",65.61064219562834,1713.391391011616],[\"Q\",65.61364219562834,1713.3943910116159,68.61455198637647,1714.3946942392372],[\"Q\",71.6154617771246,1715.3949974668583,78.61758462220357,1720.3965136049642],[\"Q\",85.61970746728252,1725.3980297430699,95.62274010310962,1734.4007587916603],[\"Q\",105.62577273893672,1743.403487840251,116.62910863834652,1753.4065201164626],[\"Q\",127.63244453775633,1763.4095523926744,136.63517391000073,1772.412281441265],[\"Q\",145.6379032822451,1781.4150104898556,152.64002612732406,1788.4171330832037],[\"Q\",159.64214897240302,1795.419255676552,165.6439685538993,1801.421075042279],[\"L\",171.64878813539553,1807.4258944080061]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":76.12,\"top\":1721.89,\"width\":74.03,\"height\":58.02,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",151.64272286374134,1723.3944232878277],[\"Q\",151.63972286374135,1723.3974232878277,150.63941960015865,1724.3977265154488],[\"Q\",149.63911633657594,1725.3980297430699,147.63850980941052,1728.3989394259333],[\"Q\",145.6379032822451,1731.399849108797,141.63669022791424,1735.4010620192817],[\"Q\",137.6354771735834,1739.4022749297665,133.63426411925258,1744.4037910678721],[\"Q\",129.63305106492174,1749.405307205978,125.63183801059091,1752.4062168888415],[\"Q\",121.63062495626006,1755.407126571705,118.62971516551194,1758.4080362545687],[\"Q\",115.62880537476381,1761.4089459374322,113.6281988475984,1762.4092491650533],[\"Q\",111.62759232043298,1763.4095523926744,110.62728905685026,1763.4095523926744],[\"Q\",109.62698579326755,1763.4095523926744,108.62668252968484,1763.4095523926744],[\"Q\",107.62637926610213,1763.4095523926744,95.62274010310962,1770.4116749860227],[\"Q\",83.61910094011711,1777.413797579371,80.61819114936898,1778.414100806992],[\"Q\",77.61728135862086,1779.4144040346132,77.61728135862086,1780.4147072622345],[\"L\",77.61728135862086,1781.4180104898555]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":1138.44,\"top\":1605.86,\"width\":138.04,\"height\":148.05,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",1139.9393472834581,1607.3592488837717],[\"Q\",1139.9393472834581,1607.3622488837716,1139.9393472834581,1608.3625521113927],[\"Q\",1139.9393472834581,1609.362855339014,1139.9393472834581,1610.363158566635],[\"Q\",1139.9393472834581,1611.3634617942562,1142.9402570742063,1616.364977932362],[\"Q\",1145.9411668649545,1621.366494070468,1152.9432897100335,1631.3695263466798],[\"Q\",1159.9454125551124,1641.3725586228913,1171.9490517181048,1656.377107037209],[\"Q\",1183.9526908810974,1671.3816554515267,1202.958452889169,1690.387416776329],[\"Q\",1221.9642148972405,1709.3931781011313,1236.968763850981,1723.3974232878277],[\"Q\",1251.9733128047217,1737.401668474524,1259.9757389133833,1743.403487840251],[\"Q\",1267.978165022045,1749.405307205978,1272.9796813399585,1752.4062168888415],[\"L\",1277.984197657872,1755.410126571705]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":1068.42,\"top\":1647.87,\"width\":200.07,\"height\":130.05,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",1269.9817715492104,1649.3719844438608],[\"Q\",1269.9787715492105,1649.3749844438607,1268.9784682856277,1649.3749844438607],[\"Q\",1267.978165022045,1649.3749844438607,1265.9775584948798,1651.3755908991031],[\"Q\",1263.9769519677143,1653.3761973543455,1257.9751323862179,1658.3777134924514],[\"Q\",1251.9733128047217,1663.3792296305573,1236.968763850981,1673.3822619067691],[\"Q\",1221.9642148972405,1683.3852941829807,1199.957543098421,1698.3898425972984],[\"Q\",1177.9508712996012,1713.3943910116159,1153.9435929736162,1729.3992426535547],[\"Q\",1129.9363146476312,1745.4040942954935,1114.9317656938906,1755.4071265717052],[\"Q\",1099.9272167401498,1765.4101588479168,1084.9226677864092,1772.412281441265],[\"L\",1069.9151188326687,1779.4174040346131]]}]}";
+      var canvasImage = "canvas.png";
+      var fallbackImage = null;
+      var fabricCanvas = null, saveTimer = null;
+      var CANVAS_WIDTH = 1200;
+      var CANVAS_HEIGHT = 1600;
+      
+      var editor = document.getElementById('editor');
+      var saveStatus = document.getElementById('saveStatus');
+      
+      try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) { var data = JSON.parse(saved); if (data.content) editor.value = data.content; } } catch(e){}
+      
+      function scheduleSave() {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(function() {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ content: editor.value })); saveStatus.textContent = 'saved'; } catch(e){}
+        }, 1000);
+      }
+      editor.addEventListener('input', function() { saveStatus.textContent = 'modified'; scheduleSave(); });
+      
+      function resizeFabricCanvas() {
+        if (!fabricCanvas) return;
+        var container = document.getElementById('canvasContainer');
+        var rect = container.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+        
+        // Scale canvas to fit container exactly
+        var scaleX = rect.width / CANVAS_WIDTH;
+        var scaleY = rect.height / CANVAS_HEIGHT;
+        var scale = Math.min(scaleX, scaleY);
+        
+        // Apply CSS transform to scale the canvas
+        var canvasWrapper = fabricCanvas.wrapperEl;
+        if (canvasWrapper) {
+          canvasWrapper.style.transformOrigin = 'top left';
+          canvasWrapper.style.transform = 'scale(' + scale + ')';
+          
+          // Center the canvas if there's extra space
+          var scaledWidth = CANVAS_WIDTH * scale;
+          var scaledHeight = CANVAS_HEIGHT * scale;
+          var offsetX = (rect.width - scaledWidth) / 2;
+          var offsetY = (rect.height - scaledHeight) / 2;
+          canvasWrapper.style.marginLeft = offsetX + 'px';
+          canvasWrapper.style.marginTop = offsetY + 'px';
+        }
+      }
+      
+      function initCanvas() {
+        var container = document.getElementById('canvasContainer');
+        var rect = container.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          // Use container dimensions scaled up for higher resolution
+          var scale = 2; // 2x for crisp rendering
+          CANVAS_WIDTH = Math.round(rect.width * scale);
+          CANVAS_HEIGHT = Math.round(rect.height * scale);
+        }
+        
+        fabricCanvas = new fabric.Canvas('fabricCanvas', { 
+          width: CANVAS_WIDTH, 
+          height: CANVAS_HEIGHT, 
+          backgroundColor: null,
+          selection: true,
+          preserveObjectStacking: true
+        });
+        fabricCanvas.freeDrawingBrush.width = 3;
+        fabricCanvas.freeDrawingBrush.color = '#000000';
+        
+        if (canvasJson) {
+          fabricCanvas.loadFromJSON(canvasJson, function() {
+            fabricCanvas.renderAll();
+            resizeFabricCanvas();
+          });
+        } else if (canvasImage || fallbackImage) {
+          fabric.Image.fromURL(canvasImage || fallbackImage, function(img) {
+            if (!img) return;
+            img.set({ left: 0, top: 0, selectable: true });
+            fabricCanvas.add(img);
+            fabricCanvas.renderAll();
+            resizeFabricCanvas();
+          }, null, { crossOrigin: 'anonymous' });
+        } else {
+          resizeFabricCanvas();
+        }
+      }
+      
+      document.getElementById('selectBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = false; 
+          this.classList.add('active'); 
+          document.getElementById('drawBtn').classList.remove('active'); 
+        } 
+      };
+      document.getElementById('drawBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = true; 
+          this.classList.add('active'); 
+          document.getElementById('selectBtn').classList.remove('active'); 
+        } 
+      };
+      
+      setTimeout(initCanvas, 150);
+      
+      window.addEventListener('resize', function() {
+        resizeFabricCanvas();
+      });
+    })();
+  </script>
+</body>
+</html>
