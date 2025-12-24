@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noat Boat - Published Notes</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B3%3C/text%3E%3C/svg%3E">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #f2f2f2;
+      color: #111;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; flex: 1; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .boat-container {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14px; line-height: 1.1; white-space: pre; margin: 20px auto; color: #666;
+    }
+    h1 { font-size: 28px; margin-top: 20px; font-weight: 700; }
+    .subtitle { color: #666; font-size: 14px; margin-top: 8px; }
+    .notes-list { background: #ffffff; border: 1px solid #d9d9d9; border-radius: 12px; overflow: hidden; }
+    .note-link {
+      display: block; padding: 16px 20px; text-decoration: none; color: #111;
+      border-bottom: 1px solid #d9d9d9; transition: background 0.15s ease;
+    }
+    .note-link:last-child { border-bottom: none; }
+    .note-link:hover { background: #f8f8f8; }
+    .note-title { font-size: 16px; font-weight: 600; color: #0066cc; }
+    .note-meta { font-size: 12px; color: #666; margin-top: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <pre class="boat-container" id="asciiBoat">   .  o ..                  
+     o . o o.o                
+          ...oo               
+            __[]__            
+         __|_o_o_o\\__         
+         \\"""""""""\"/         
+          \\. ..  . /          
+     ^^^^^^^^^^^^^^^^^^^^</pre>
+      <h1>Noat Boat</h1>
+      <p class="subtitle">Published Notes</p>
+    </div>
+    <div class="notes-list" id="notesList">
+      
+      <a href="./again-beeee/index.html" class="note-link">
+        <div class="note-title">AGAIN BEEEE</div>
+        <div class="note-meta">12/24/2025</div>
+      </a><!-- NOTE_LINKS_PLACEHOLDER -->
+    </div>
+  </div>
+  <div class="footer">Made with Noat Boat</div>
+  <script>
+    (function() {
+      var boatEl = document.getElementById('asciiBoat');
+      if (!boatEl) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var base = boatEl.textContent.replace(/\r/g, '');
+      var lines = base.split('\n');
+      var wavePattern = '^_^^^-^^_^^^^-^^^-^';
+
+      var runsByLine = lines.map(function(line) {
+        var runs = [];
+        var re = /\^+/g;
+        var m;
+        while ((m = re.exec(line)) !== null) {
+          runs.push({ start: m.index, len: m[0].length });
+        }
+        return runs;
+      });
+
+      var stackRow = lines.findIndex(function(l) { return l.indexOf('[]') !== -1; });
+      var stackCol = stackRow >= 0 ? lines[stackRow].indexOf('[') : 0;
+      var smokeRowCount = 3;
+      var maxSmokeWidth = 18;
+      var smokeWidth = Math.min(maxSmokeWidth, Math.max(8, stackCol));
+      var smokeRows = [];
+      var smokeStart = Math.max(0, Math.min(Math.max(0, stackCol - 1), stackCol - smokeWidth + 3));
+
+      function extractRegion(line, start, len) {
+        var s = String(line || '').padEnd ? String(line || '').padEnd(start + len, ' ') : String(line || '') + Array(start + len).join(' ');
+        return s.slice(start, start + len);
+      }
+
+      function overlay(line, start, text) {
+        var need = start + text.length;
+        var padded = String(line || '').padEnd ? String(line || '').padEnd(need, ' ') : String(line || '') + Array(need).join(' ');
+        var chars = padded.split('');
+        for (var i = 0; i < text.length; i++) chars[start + i] = text[i];
+        return chars.join('');
+      }
+
+      function clearFromCol(line, col) {
+        var chars = String(line || '').split('');
+        for (var i = col; i < chars.length; i++) {
+          if (chars[i] === 'o' || chars[i] === '.') chars[i] = ' ';
+        }
+        return chars.join('');
+      }
+
+      var seed = 123456789;
+      function rand() {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      }
+
+      function driftAndFadeRow(row) {
+        var shifted = row.slice(1) + ' ';
+        var chars = shifted.split('');
+        for (var i = 0; i < chars.length; i++) {
+          var c = chars[i];
+          if (c === 'o' && rand() < 0.30) chars[i] = '.';
+          else if (c === '.' && rand() < 0.22) chars[i] = ' ';
+        }
+        return chars.join('');
+      }
+
+      function makeSeedRow() {
+        var chars = Array(smokeWidth).fill ? Array(smokeWidth).fill(' ') : [];
+        if (!chars.fill) for (var i = 0; i < smokeWidth; i++) chars.push(' ');
+        var origin = Math.max(0, smokeWidth - 3);
+        var count = 3 + Math.floor(rand() * 4);
+        for (var i = 0; i < count; i++) {
+          var driftLeft = Math.floor(rand() * 10);
+          var pos = Math.max(0, origin - driftLeft);
+          var far = (origin - pos) >= 5;
+          chars[pos] = rand() < (far ? 0.20 : 0.55) ? 'o' : '.';
+        }
+        if (rand() < 0.55) {
+          var pos = Math.max(0, origin - (8 + Math.floor(rand() * 8)));
+          if (pos < smokeWidth && chars[pos] === ' ') chars[pos] = '.';
+        }
+        if (rand() < 0.30) {
+          var pos = Math.max(0, origin - (10 + Math.floor(rand() * 6)));
+          if (pos < smokeWidth && chars[pos] === ' ') chars[pos] = '.';
+        }
+        return chars.join('');
+      }
+
+      var smokeBuf = [];
+      if (stackRow >= 0) {
+        for (var r = Math.max(0, stackRow - smokeRowCount); r < stackRow; r++) {
+          smokeRows.push(r);
+        }
+        smokeBuf = smokeRows.map(function(r) { return extractRegion(lines[r], smokeStart, smokeWidth); });
+
+        for (var j = 0; j < smokeRows.length; j++) {
+          var row = smokeRows[j];
+          var line = String(lines[row] || '');
+          var chars = smokeBuf[j].split('');
+          var insertPos = smokeWidth - 1;
+          for (var c = stackCol; c < line.length; c++) {
+            var ch = line[c];
+            if (ch === 'o' || ch === '.') {
+              while (insertPos >= 0 && chars[insertPos] === 'o') insertPos--;
+              if (insertPos >= 0) { chars[insertPos] = ch; insertPos--; }
+            }
+          }
+          smokeBuf[j] = chars.join('');
+        }
+      }
+
+      var offset = 0;
+      var smokeTick = 0;
+      var intervalMs = 140;
+
+      setInterval(function() {
+        offset = (offset + 1) % wavePattern.length;
+        smokeTick++;
+
+        if (smokeRows.length) {
+          smokeBuf = smokeBuf.map(driftAndFadeRow);
+          if (smokeTick % 2 === 0) {
+            smokeBuf = smokeBuf.slice(1).concat([makeSeedRow()]);
+          }
+        }
+
+        var out = lines.map(function(line, i) {
+          var runs = runsByLine[i];
+          if (!runs || runs.length === 0) return line;
+          var chars = line.split('');
+          for (var j = 0; j < runs.length; j++) {
+            var r = runs[j];
+            var need = r.len;
+            var repeatCount = Math.ceil((need + offset) / wavePattern.length) + 2;
+            var seq = '';
+            for (var x = 0; x < repeatCount; x++) seq += wavePattern;
+            seq = seq.slice(offset, offset + need);
+            for (var k = 0; k < need; k++) chars[r.start + k] = seq[k];
+          }
+          return chars.join('');
+        });
+
+        if (smokeRows.length && stackCol > 0) {
+          for (var j = 0; j < smokeRows.length; j++) {
+            var row = smokeRows[j];
+            out[row] = clearFromCol(out[row], stackCol);
+          }
+        }
+
+        if (smokeRows.length) {
+          for (var j = 0; j < smokeRows.length; j++) {
+            var row = smokeRows[j];
+            out[row] = overlay(out[row], smokeStart, smokeBuf[j]);
+          }
+        }
+
+        boatEl.textContent = out.join('\n');
+      }, intervalMs);
+    })();
+  </script>
+</body>
+</html>
