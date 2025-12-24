@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM MMMM - Noat Boat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f2f2f2; color: #111; height: 100vh; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #d9d9d9; background: #ffffff; gap: 12px; }
+    .back-btn { padding: 6px 12px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 13px; color: #111; text-decoration: none; }
+    .title { font-size: 16px; font-weight: 700; font-family: monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .save-status { font-size: 12px; color: #666; font-family: monospace; }
+    .main { display: flex; flex: 1; overflow: hidden; gap: 16px; padding: 14px; min-height: 0; }
+    .editor-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; }
+    textarea { flex: 1; border: 1px solid #d9d9d9; border-radius: 12px; resize: none; padding: 14px; font-size: 14px; line-height: 1.55; font-family: monospace; background: #fff; color: #111; outline: none; }
+    .canvas-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; border: 1px solid #d9d9d9; border-radius: 12px; overflow: hidden; background: #fff; }
+    .canvas-toolbar { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #d9d9d9; background: #ffffff; flex-shrink: 0; }
+    .btn { padding: 5px 10px; border: 1px solid #d9d9d9; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 12px; color: #111; }
+    .btn.active { background: #eef5ff; border-color: #c9dcff; }
+    #canvasContainer { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+    #canvasContainer canvas { display: block; }
+    #canvasContainer .canvas-container { position: absolute !important; }
+    .audio-player { padding: 10px; border-top: 1px solid #d9d9d9; display: none; flex-shrink: 0; }
+    .audio-player audio { width: 100%; }
+    @media (max-width: 768px) { .main { flex-direction: column; } .editor-pane, .canvas-pane { flex: none; height: 45vh; } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="../index.html" class="back-btn">Back</a>
+    <div class="title">LLM MMMM</div>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+  <div class="main">
+    <div class="editor-pane">
+      <textarea id="editor" spellcheck="false">Cmon man do somehting righjt</textarea>
+    </div>
+    <div class="canvas-pane" id="canvasPane">
+      <div class="canvas-toolbar">
+        <button id="selectBtn" class="btn active">Select</button>
+        <button id="drawBtn" class="btn">Draw</button>
+      </div>
+      <div id="canvasContainer">
+        <canvas id="fabricCanvas"></canvas>
+      </div>
+      <div class="audio-player"><audio controls loop src=""></audio></div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var STORAGE_KEY = 'noatboat_' + "llm-mmmm";
+      var canvasJson = "{\"version\":\"5.3.0\",\"objects\":[{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":402.22,\"top\":649.57,\"width\":516.16,\"height\":575.93,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",745.8228614318708,651.0693632779306],[\"Q\",745.8198614318708,651.0723632779307,741.8186483775398,651.0723632779307],[\"Q\",737.817435323209,651.0723632779307,726.8140994237992,653.0729697331731],[\"Q\",715.8107635243895,655.0735761884154,698.8056080434834,661.0753955541425],[\"Q\",681.8004525625773,667.0772149198694,653.7919611822615,679.0808536513234],[\"Q\",625.7834698019456,691.0844923827775,593.7737653672989,707.0893440247163],[\"Q\",561.7640609326522,723.0941956666551,536.7564793430845,738.0987440809727],[\"Q\",511.7488977535167,753.1032924952902,494.7437422726107,766.1072344543654],[\"Q\",477.7385867917046,779.1111764134407,465.7349476287121,790.1145119172736],[\"Q\",453.73130846571956,801.1178474211065,445.7288823570579,812.1211829249394],[\"Q\",437.72645624839623,823.1245184287724,430.72433340331725,837.1287636154688],[\"Q\",423.7222105582383,851.1330088021651,419.7209975039075,864.1369507612403],[\"Q\",415.71978444957665,877.1408927203156,412.7188746588285,892.1454411346333],[\"Q\",409.71796486808034,907.1499895489509,407.7173583409149,928.1563573289955],[\"Q\",405.7167518137495,949.16272510904,404.7164485501668,972.169699344327],[\"Q\",403.7161452865841,995.176673579614,403.7161452865841,1018.183647814901],[\"Q\",403.7161452865841,1041.190622050188,404.7164485501668,1062.1969898302327],[\"Q\",405.7167518137495,1083.2033576102772,408.7176616044976,1101.2088157074581],[\"Q\",411.71857139524576,1119.2142738046393,418.72069424032475,1134.218822218957],[\"Q\",425.72281708540373,1149.2233706332745,434.7255464576481,1162.2273125923498],[\"Q\",443.7282758298925,1175.231254551425,455.731914992885,1186.234590055258],[\"Q\",467.73555415587754,1197.2379255590909,484.74070963678355,1205.2403513800602],[\"Q\",501.7458651176896,1213.2427772010296,514.7498075442649,1217.2439901115144],[\"Q\",527.7537499708401,1221.245203021999,540.7576923974153,1223.2458094772414],[\"Q\",553.7616348239906,1225.2464159324836,571.7670935684794,1226.246719160105],[\"Q\",589.7725523129681,1227.247022387726,607.7780110574568,1226.246719160105],[\"Q\",625.7834698019456,1225.2464159324836,643.7889285464344,1222.2455062496201],[\"Q\",661.7943872909232,1219.2445965667566,683.8010590897427,1214.2430804286507],[\"Q\",705.8077308885623,1209.2415642905448,730.8153124781301,1203.2397449248178],[\"Q\",755.8228940676978,1197.2379255590909,780.8304756572655,1190.2358029657426],[\"Q\",805.8380572468333,1183.2336803723945,826.8444257820702,1174.2309513238038],[\"Q\",847.8507943173071,1165.2282222752133,862.8553432710478,1154.2248867713804],[\"Q\",877.8598922247884,1143.2215512675475,888.8632281241983,1130.2176093084722],[\"Q\",899.866564023608,1117.2136673493972,905.8683836051043,1101.2088157074584],[\"Q\",911.8702031866005,1085.2039640655196,914.8711129773486,1068.1988091959597],[\"Q\",917.8720227680967,1051.1936543263996,918.8723260316794,1032.1878930015973],[\"Q\",919.8726292952622,1013.1821316767952,919.8726292952622,991.1754606691293],[\"Q\",919.8726292952622,969.1687896614635,918.8723260316794,946.1618154261765],[\"Q\",917.8720227680967,923.1548411908896,914.8711129773486,907.1499895489508],[\"Q\",911.8702031866005,891.1451379070121,908.8692933958523,878.1411959479369],[\"Q\",905.8683836051042,865.1372539888616,900.8668672871906,853.1336152574075],[\"Q\",895.8653509692771,841.1299765259535,891.8641379149462,831.1269442497417],[\"Q\",887.8629248606154,821.12391197353,881.8611052791191,810.1205764696971],[\"Q\",875.8592856976229,799.1172409658642,869.8574661161267,790.1145119172736],[\"Q\",863.8556465346304,781.1117828686831,857.8538269531341,774.1096602753348],[\"Q\",851.8520073716379,767.1075376819866,844.849884526559,761.1057183162596],[\"Q\",837.8477616814799,755.1038989505327,830.845638836401,750.1023828124268],[\"Q\",823.8435159913221,745.1008666743209,814.8407866190777,740.0993505362151],[\"Q\",805.8380572468333,735.0978343981092,794.8347213474235,729.0960150323822],[\"Q\",783.8313854480136,723.0941956666551,773.8283528121865,718.0926795285493],[\"Q\",763.8253201763595,713.0911633904434,754.8225908041152,708.0896472523375],[\"Q\",745.8198614318708,703.0881311142316,737.8174353232091,698.0866149761257],[\"Q\",729.8150092145473,693.0850988380199,724.8134928966338,691.0844923827776],[\"Q\",719.8119765787203,689.0838859275352,716.8110667879721,688.0835826999141],[\"Q\",713.810156997224,687.0832794722929,711.8095504700586,687.0832794722929],[\"Q\",709.8089439428932,687.0832794722929,707.8083374157277,687.0832794722929],[\"Q\",705.8077308885623,687.0832794722929,703.807124361397,687.0832794722929],[\"Q\",701.8065178342315,687.0832794722929,699.805911307066,687.0832794722929],[\"Q\",697.8053047799007,687.0832794722929,695.8046982527353,687.0832794722929],[\"Q\",693.8040917255698,687.0832794722929,692.8037884619871,686.0829762446717],[\"L\",691.8004851984043,685.0796730170505]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":552.26,\"top\":895.65,\"width\":0.01,\"height\":0,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",553.7586348239905,897.1469572727391],[\"L\",553.7646348239906,897.1469572727391]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":692.3,\"top\":887.64,\"width\":0.01,\"height\":0,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",693.8010917255698,889.1445314517697],[\"L\",693.8070917255699,889.1445314517697]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":534.25,\"top\":1033.69,\"width\":168.06,\"height\":0,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",535.7531760795017,1035.1888026844608],[\"Q\",535.7561760795018,1035.1888026844608,536.7564793430845,1035.1888026844608],[\"Q\",537.7567826066671,1035.1888026844608,542.7582989245807,1035.1888026844608],[\"Q\",547.7598152424943,1035.1888026844608,559.7634544054868,1035.1888026844608],[\"Q\",571.7670935684793,1035.1888026844608,588.7722490493853,1035.1888026844608],[\"Q\",605.7774045302914,1035.1888026844608,624.7831665383628,1035.1888026844608],[\"Q\",643.7889285464344,1035.1888026844608,657.7931742365922,1035.1888026844608],[\"Q\",671.7974199267502,1035.1888026844608,679.7998460354119,1035.1888026844608],[\"Q\",687.8022721440735,1035.1888026844608,692.8037884619871,1035.1888026844608],[\"Q\",697.8053047799007,1035.1888026844608,700.8062145706488,1035.1888026844608],[\"L\",703.810124361397,1035.1888026844608]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":62.11,\"top\":69.39,\"width\":50.02,\"height\":119.79,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",63.61003566846293,70.8934912576506],[\"Q\",63.61303566846293,70.8964912576506,63.61303566846293,71.89679448527177],[\"Q\",63.61303566846293,72.89709771289294,64.61333893204564,78.89891707861997],[\"Q\",65.61364219562834,84.90073644434702,69.61485524995919,93.90346549293757],[\"Q\",73.61606830429002,102.90619454152812,78.61758462220357,112.90922681773985],[\"Q\",83.61910094011711,122.91225909395158,88.62061725803065,132.9152913701633],[\"Q\",93.6221335759442,142.91832364637503,97.62334663027505,151.92105269496557],[\"Q\",101.62455968460588,160.92378174355613,103.6251662117713,167.92590433690435],[\"Q\",105.62577273893672,174.92802693025254,107.62637926610213,178.92923984073724],[\"Q\",109.62698579326755,182.93045275122194,110.62728905685026,184.93105920646428],[\"Q\",111.62759232043298,186.9316656617066,111.62759232043298,187.93196888932778],[\"Q\",111.62759232043298,188.93227211694895,112.62789558401569,189.93257534457013],[\"Q\",113.6281988475984,190.9328785721913,113.6281988475984,189.93257534457013],[\"Q\",113.6281988475984,188.93227211694895,112.62789558401569,187.93196888932778],[\"L\",111.62459232043298,186.92866566170662]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":1236.47,\"top\":47.39,\"width\":0,\"height\":130.05,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",1237.9690671145638,48.88682024998481],[\"Q\",1237.9690671145638,48.88982024998481,1237.9690671145638,49.89012347760598],[\"Q\",1237.9690671145638,50.89042670522715,1237.9690671145638,56.89224607095419],[\"Q\",1237.9690671145638,62.894065436681224,1237.9690671145638,75.89800739575647],[\"Q\",1237.9690671145638,88.90194935483171,1237.9690671145638,103.9064977691493],[\"Q\",1237.9690671145638,118.91104618346688,1237.9690671145638,130.91468491492094],[\"Q\",1237.9690671145638,142.91832364637503,1237.9690671145638,152.92135592258677],[\"Q\",1237.9690671145638,162.92438819879848,1237.9690671145638,168.9262075645255],[\"Q\",1237.9690671145638,174.92802693025254,1237.9690671145638,176.9286333854949],[\"L\",1237.9690671145638,178.93223984073722]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":78.12,\"top\":1635.87,\"width\":0,\"height\":112.04,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",79.61788788578627,1637.3683457124068],[\"Q\",79.61788788578627,1637.3713457124068,79.61788788578627,1638.371648940028],[\"Q\",79.61788788578627,1639.3719521676492,79.61788788578627,1640.3722553952703],[\"Q\",79.61788788578627,1641.3725586228913,79.61788788578627,1645.373771533376],[\"Q\",79.61788788578627,1649.3749844438607,79.61788788578627,1654.3765005819666],[\"Q\",79.61788788578627,1659.3780167200725,79.61788788578627,1674.38256513439],[\"Q\",79.61788788578627,1689.3871135487077,79.61788788578627,1691.38772000395],[\"Q\",79.61788788578627,1693.3883264591925,79.61788788578627,1695.388932914435],[\"Q\",79.61788788578627,1697.389539369677,79.61788788578627,1700.3904490525406],[\"Q\",79.61788788578627,1703.391358735404,79.61788788578627,1705.3919651906465],[\"Q\",79.61788788578627,1707.392571645889,79.61788788578627,1708.3928748735102],[\"Q\",79.61788788578627,1709.3931781011313,79.61788788578627,1711.3937845563737],[\"Q\",79.61788788578627,1713.3943910116159,79.61788788578627,1714.3946942392372],[\"Q\",79.61788788578627,1715.3949974668583,79.61788788578627,1716.3953006944794],[\"Q\",79.61788788578627,1717.3956039221005,79.61788788578627,1718.3959071497216],[\"Q\",79.61788788578627,1719.3962103773429,79.61788788578627,1720.3965136049642],[\"Q\",79.61788788578627,1721.3968168325853,79.61788788578627,1723.3974232878277],[\"Q\",79.61788788578627,1725.3980297430699,79.61788788578627,1727.3986361983123],[\"Q\",79.61788788578627,1729.3992426535547,79.61788788578627,1730.399545881176],[\"Q\",79.61788788578627,1731.399849108797,79.61788788578627,1732.4001523364182],[\"Q\",79.61788788578627,1733.4004555640392,79.61788788578627,1734.4007587916603],[\"Q\",79.61788788578627,1735.4010620192817,79.61788788578627,1736.401365246903],[\"Q\",79.61788788578627,1737.401668474524,79.61788788578627,1738.4019717021451],[\"Q\",79.61788788578627,1739.4022749297665,79.61788788578627,1740.4025781573876],[\"Q\",79.61788788578627,1741.4028813850086,79.61788788578627,1742.40318461263],[\"Q\",79.61788788578627,1743.403487840251,79.61788788578627,1746.4043975231145],[\"L\",79.61788788578627,1749.408307205978]]},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":1202.46,\"top\":1571.85,\"width\":12.01,\"height\":190.06,\"fill\":null,\"stroke\":\"#000000\",\"strokeWidth\":3,\"strokeDashArray\":null,\"strokeLineCap\":\"round\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"round\",\"strokeUniform\":false,\"strokeMiterLimit\":10,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"selectable\":true,\"hasControls\":true,\"path\":[[\"M\",1203.9587561527517,1573.3489391446517],[\"Q\",1203.9587561527517,1573.3519391446516,1203.9587561527517,1574.352242372273],[\"Q\",1203.9587561527517,1575.352545599894,1203.9587561527517,1579.3537585103786],[\"Q\",1203.9587561527517,1583.3549714208634,1203.9587561527517,1591.3573972418328],[\"Q\",1203.9587561527517,1599.3598230628022,1203.9587561527517,1608.3625521113927],[\"Q\",1203.9587561527517,1617.3652811599834,1203.9587561527517,1625.3677069809528],[\"Q\",1203.9587561527517,1633.3701328019222,1203.9587561527517,1641.3725586228916],[\"Q\",1203.9587561527517,1649.3749844438607,1203.9587561527517,1656.377107037209],[\"Q\",1203.9587561527517,1663.3792296305573,1203.9587561527517,1667.3804425410422],[\"Q\",1203.9587561527517,1671.3816554515267,1204.9590594163342,1675.3828683620113],[\"Q\",1205.959362679917,1679.384081272496,1205.959362679917,1683.3852941829805],[\"Q\",1205.959362679917,1687.3865070934653,1205.959362679917,1689.3871135487077],[\"Q\",1205.959362679917,1691.38772000395,1205.959362679917,1693.3883264591923],[\"Q\",1205.959362679917,1695.3889329144347,1205.959362679917,1698.3898425972984],[\"Q\",1205.959362679917,1701.390752280162,1207.9599692070824,1709.393178101131],[\"Q\",1209.9605757342479,1717.3956039221005,1210.9608789978306,1724.3977265154488],[\"Q\",1211.9611822614133,1731.399849108797,1211.9611822614133,1737.401668474524],[\"Q\",1211.9611822614133,1743.403487840251,1212.961485524996,1748.405003978357],[\"Q\",1213.9617887885788,1753.4065201164628,1213.9617887885788,1756.4074297993263],[\"Q\",1213.9617887885788,1759.4083394821898,1214.9620920521616,1761.4089459374322],[\"L\",1215.965395315744,1763.4125523926743]]}]}";
+      var canvasImage = "canvas.png";
+      var fallbackImage = null;
+      var fabricCanvas = null, saveTimer = null;
+      
+      var editor = document.getElementById('editor');
+      var saveStatus = document.getElementById('saveStatus');
+      
+      try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) { var data = JSON.parse(saved); if (data.content) editor.value = data.content; } } catch(e){}
+      
+      function scheduleSave() {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(function() {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ content: editor.value })); saveStatus.textContent = 'saved'; } catch(e){}
+        }, 1000);
+      }
+      editor.addEventListener('input', function() { saveStatus.textContent = 'modified'; scheduleSave(); });
+      
+      function fitCanvasViewport(padding) {
+        padding = padding || 24;
+        if (!fabricCanvas) return;
+
+        var objects = fabricCanvas.getObjects();
+        if (!objects || objects.length === 0) {
+          fabricCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+          fabricCanvas.requestRenderAll();
+          return;
+        }
+
+        // Compute overall bounds in canvas coords
+        var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (var i = 0; i < objects.length; i++) {
+          var r = objects[i].getBoundingRect(true, true);
+          minX = Math.min(minX, r.left);
+          minY = Math.min(minY, r.top);
+          maxX = Math.max(maxX, r.left + r.width);
+          maxY = Math.max(maxY, r.top + r.height);
+        }
+
+        var contentW = Math.max(1, maxX - minX);
+        var contentH = Math.max(1, maxY - minY);
+
+        var cw = fabricCanvas.getWidth();
+        var ch = fabricCanvas.getHeight();
+
+        var availW = Math.max(1, cw - padding * 2);
+        var availH = Math.max(1, ch - padding * 2);
+
+        var scale = Math.min(availW / contentW, availH / contentH);
+
+        // Center content
+        var contentCx = minX + contentW / 2;
+        var contentCy = minY + contentH / 2;
+        var tx = (cw / 2) - (contentCx * scale);
+        var ty = (ch / 2) - (contentCy * scale);
+
+        fabricCanvas.setViewportTransform([scale, 0, 0, scale, tx, ty]);
+        fabricCanvas.requestRenderAll();
+      }
+      
+      function initCanvas() {
+        var container = document.getElementById('canvasContainer');
+        var rect = container.getBoundingClientRect();
+        
+        var width = Math.max(Math.floor(rect.width), 400);
+        var height = Math.max(Math.floor(rect.height), 300);
+        
+        fabricCanvas = new fabric.Canvas('fabricCanvas', {
+          width: width,
+          height: height,
+          backgroundColor: null,
+          selection: true,
+          preserveObjectStacking: true
+        });
+        
+        fabricCanvas.freeDrawingBrush.width = 3;
+        fabricCanvas.freeDrawingBrush.color = '#000000';
+        
+        if (canvasJson) {
+          fabricCanvas.loadFromJSON(canvasJson, function() {
+            fitCanvasViewport();
+            fabricCanvas.renderAll();
+          });
+        } else if (canvasImage || fallbackImage) {
+          fabric.Image.fromURL(canvasImage || fallbackImage, function(img) {
+            if (!img) return;
+            
+            var canvasWidth = fabricCanvas.width;
+            var canvasHeight = fabricCanvas.height;
+            
+            // Scale image to fit within canvas with padding
+            var maxWidth = canvasWidth * 0.9;
+            var maxHeight = canvasHeight * 0.9;
+            
+            var scale = 1;
+            if (img.width > maxWidth || img.height > maxHeight) {
+              scale = Math.min(maxWidth / img.width, maxHeight / img.height);
+            }
+            
+            img.scale(scale);
+            img.set({
+              left: (canvasWidth - img.getScaledWidth()) / 2,
+              top: (canvasHeight - img.getScaledHeight()) / 2,
+              selectable: true
+            });
+            
+            fabricCanvas.add(img);
+            fabricCanvas.renderAll();
+          }, null, { crossOrigin: 'anonymous' });
+        }
+      }
+      
+      document.getElementById('selectBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = false; 
+          this.classList.add('active'); 
+          document.getElementById('drawBtn').classList.remove('active'); 
+        } 
+      };
+      document.getElementById('drawBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = true; 
+          this.classList.add('active'); 
+          document.getElementById('selectBtn').classList.remove('active'); 
+        } 
+      };
+      
+      setTimeout(initCanvas, 150);
+      
+      window.addEventListener('resize', function() {
+        if (!fabricCanvas) return;
+        var container = document.getElementById('canvasContainer');
+        var rect = container.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          fabricCanvas.setDimensions({ width: rect.width, height: rect.height });
+          fitCanvasViewport();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
